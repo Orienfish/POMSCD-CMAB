@@ -29,12 +29,12 @@ np.fill_diagonal(sigma, 1.0)
 cmab.gamma.lamda = 0.1 # lambda
 
 # generate mu_c
-delta = 1.0
+delta = 2.0
 mu = np.zeros((p, )) # normal mean
 mu_c = np.zeros((p, ))
 for i in range(0, int(q/2)): # first q elements to delta, error mean
     mu_c[i*2] = delta
-    mu_c[i*2+1] = -delta
+    mu_c[i*2+1] = delta
 # print(mu_c)
 
 CMAB_ADD, CMAB_s_ADD, rdm_ADD, opt_ADD = [], [], [], []
@@ -72,14 +72,13 @@ for n in range(0, N):
     cmab.test.max = None
 
     # optimal, m = p
-    cmab.test.h = 10.0
+    cmab.test.h = 8.0
     detect = cmab.opt(p, L, sigma, Xn)
     ADD = detect - tau
     print('opt', ADD, cmab.test.max, cmab.test.h)
     if ADD > 0: opt_ADD.append(ADD)
     opt_MAX.append(cmab.test.max)
     cmab.test.max = None
-
 
 def result(label, res_list, N):
     res_list = np.array(res_list)
@@ -92,11 +91,11 @@ def result(label, res_list, N):
     print('max: {} min: {} mean: {} var: {}'.format(res_max, res_min, \
             res_mean, res_var))
 
-result('CMAB_ADD', CMAB_ADD, N)
-result('CMAB_MAX', CMAB_MAX, N)
-result('CMAB_s_ADD', CMAB_s_ADD, N)
-result('CMAB_s_MAX', CMAB_s_MAX, N)
-result('rdm_ADD', rdm_ADD, N)
-result('rdm_MAX', rdm_MAX, N)
+#result('CMAB_ADD', CMAB_ADD, N)
+#result('CMAB_MAX', CMAB_MAX, N)
+#result('CMAB_s_ADD', CMAB_s_ADD, N)
+#result('CMAB_s_MAX', CMAB_s_MAX, N)
+#result('rdm_ADD', rdm_ADD, N)
+#result('rdm_MAX', rdm_MAX, N)
 result('opt_ADD', opt_ADD, N)
 result('opt_MAX', opt_MAX, N)

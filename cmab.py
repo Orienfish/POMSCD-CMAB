@@ -424,6 +424,3 @@ def opt(p, L, sigma, Xn):
             break
 
     return detect
-
-
-
