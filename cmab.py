@@ -7,7 +7,7 @@
 import math
 import numpy as np
 from itertools import combinations
-
+import random
 
 # ### Update Vn and Mun
 
@@ -303,10 +303,65 @@ def CMAB_s(p, m, L, sigma, Xn, gamma_func):
 
         # Greedily select the sensors that have highest rewards
         r = np.absolute(mun_old) + np.sqrt(gamma_n * np.diag(vn_old))
-        max_c = np.argsort(r)[p-m:]
+        zn = np.argsort(r)[p-m:]
+        Xn_observe = Xn[iter, zn]
 
-        # print("iter {} selected sensors: {}".format(iter, max_c))
-        zn = np.array(max_c)
+        # based on the selected arm, update mun and vn
+        vn_new = update_vn(vn_old, zn, sigma, gamma.lamda, m, p)
+        mun_new = update_mun(mun_old, zn, sigma, gamma.lamda, m, p, Xn_observe, vn_new)
+
+        # copy new to old
+        vn_old = np.copy(vn_new)
+        mun_old = np.copy(mun_new)
+
+        # note the detection here is also different from CMAB
+        t = np.dot(mun_old, mun_old)
+        if CMAB_s.max == None:
+            CMAB_s.max = t
+        elif t > CMAB_s.max:
+            CMAB_s.max = t
+
+        if t > CMAB_s.h:
+            # print("Abnormal detected at iter {}".format(iter))
+            detect = iter
+            break
+
+    return detect
+
+CMAB_s.max = None
+CMAB_s.h = None
+
+
+# ### random algorithm
+
+def rdm(p, m, L, sigma, Xn):
+    '''
+    Random selection.
+
+    Args:
+        p : total # of sensors
+        m : total # of observed sensors
+        L : length of one experiment episode
+        sigma : assumed covariance matrix of the observations
+        Xn : oberservations, (observation #) * (sensor #)
+
+    Returns:
+        detect : the number of observation that detects abnormality
+            in this episode. If no abnormality is detected, return L.
+    '''
+    # assert check
+    assert(Xn.shape == (L, p))
+
+    # init mu and v, not sure
+    mun_old = np.zeros((p, ))
+    vn_old = np.zeros((p, p))
+    np.fill_diagonal(vn_old, 1.0)
+
+    # continue experiments and get ADD
+    detect = L # init to the total # of observation
+    for iter in range(0, L):
+        rdm_c = random.sample(range(0, p), m)
+        zn = np.array(rdm_c)
         Xn_observe = Xn[iter, zn]
 
         # based on the selected arm, update mun and vn
@@ -324,53 +379,51 @@ def CMAB_s(p, m, L, sigma, Xn, gamma_func):
 
     return detect
 
+# ### optimal algorithm: all observable
 
-# ### Generate the sensor environment
-
-# In[105]:
-
-
-# generate input data streams
-def gen_input(mu, mu_c, sigma, tau, L):
+def opt(p, L, sigma, Xn):
     '''
-    Generate observation for one episode from expected mean and
-    covariance matrix.
+    Optimal algorithm.
 
     Args:
-        mu : normal mean of the observations, all zeros
-        mu_c : abnormal mean of the observations
+        p : total # of sensors
+        m : total # of observed sensors
+        L : length of one experiment episode
         sigma : assumed covariance matrix of the observations
-        tau : the time that abnormality starts
-        L : total number of observations in one episode
+        Xn : oberservations, (observation #) * (sensor #)
 
     Returns:
-        Xn : generated observations for one episode
+        detect : the number of observation that detects abnormality
+            in this episode. If no abnormality is detected, return L.
     '''
-    # generate multi-variate gaussian
-    Xn = np.random.multivariate_normal(mu, sigma, tau)
-    # print(Xn.shape) # (50, 10), first dimension is exp. episode
-    Xn_abnormal = np.random.multivariate_normal(mu_c, sigma, L - tau)
-    # print(Xn_abnormal.shape) # (150, 10)
-    Xn = np.vstack((Xn, Xn_abnormal))
-    return Xn
+    # assert check
+    assert(Xn.shape == (L, p))
 
-def visualize(Xn):
-    '''
-    Visualize generated observations for debugging.
+    # init mu and v, not sure
+    mun_old = np.zeros((p, ))
+    vn_old = np.zeros((p, p))
+    np.fill_diagonal(vn_old, 1.0)
 
-    Args:
-        Xn : generated observations for one episode
-    '''
-    print(Xn.shape)
-    import matplotlib.pyplot as plt
-    # Plot the sampled functions
-    plt.figure()
-    X = np.arange(L)
-    for i in range(q+1):
-        plt.plot(X, Xn[:, i], linestyle='-', marker='o', markersize=3)
-    plt.xlabel('$x$', fontsize=13)
-    plt.ylabel('$y = f(x)$', fontsize=13)
-    plt.title('5 different function sampled from a Gaussian process')
-    plt.show()
+    # continue experiments and get ADD
+    detect = L # init to the total # of observation
+    for iter in range(0, L):
+        zn = np.array(range(0, p))
+        Xn_observe = Xn[iter, :]
+
+        # based on the selected arm, update mun and vn
+        vn_new = update_vn(vn_old, zn, sigma, gamma.lamda, p, p)
+        mun_new = update_mun(mun_old, zn, sigma, gamma.lamda, p, p, Xn_observe, vn_new)
+
+        # copy new to old
+        vn_old = np.copy(vn_new)
+        mun_old = np.copy(mun_new)
+
+        if test(mun_old, vn_old) == True:
+            # print("Abnormal detected at iter {}".format(iter))
+            detect = iter
+            break
+
+    return detect
+
 
 
