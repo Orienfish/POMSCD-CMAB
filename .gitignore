@@ -133,3 +133,5 @@ dmypy.json
 
 # jupyter notebook
 .ipynb_checkpoints
+*.key
+*.pem
