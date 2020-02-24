@@ -15,7 +15,7 @@ m = 5 # total # of observed sensors
 
 tau = 50 # error ocurrance time
 L = tau + 200 # length of one exp episode
-N = 100 # total experiment times
+N = 200 # total experiment times
 
 # generate sigma
 # some confusion on sigma[i,i]. set it to 1.0 here. not sure.
@@ -44,7 +44,7 @@ def log(fname, msg):
 def run_exp(delta):
     # logging file name
     fname = str(delta) + '.log'
-    
+
     # generate mu_c
     # delta = 2.0
     mu = np.zeros((p, )) # normal mean
@@ -59,7 +59,7 @@ def run_exp(delta):
     for n in range(0, N):
         Xn = env.gen_input(mu, mu_c, sigma, tau, L)
         log(fname, 'mu_c {} iter {}'.format(mu_c, n))
-        print('iter', n)
+        # print('iter', n)
         # env.visualize(Xn)
 
         # CMAB
@@ -98,24 +98,24 @@ def run_exp(delta):
         opt_MAX.append(cmab.test.max)
         cmab.test.max = None
 
-    def result(label, res_list, N):
+    def result(label, res_list, N, delta):
         res_list = np.array(res_list)
         res_max = np.max(res_list)
         res_min = np.min(res_list)
         res_mean = np.mean(res_list)
         res_var = np.var(res_list)
-        print('\nResult of', label)
+        print('\nResult of', label, 'with delta', delta)
         print('Valid percentage of samples', len(res_list) / N * 100, '%')
         print('max: {} min: {} mean: {} var: {}'.format(res_max, res_min,                 res_mean, res_var))
 
-    result('CMAB_ADD', CMAB_ADD, N)
-    result('CMAB_MAX', CMAB_MAX, N)
-    result('CMAB_s_ADD', CMAB_s_ADD, N)
-    result('CMAB_s_MAX', CMAB_s_MAX, N)
-    result('rdm_ADD', rdm_ADD, N)
-    result('rdm_MAX', rdm_MAX, N)
-    result('opt_ADD', opt_ADD, N)
-    result('opt_MAX', opt_MAX, N)
+    result('CMAB_ADD', CMAB_ADD, N, delta)
+    result('CMAB_MAX', CMAB_MAX, N, delta)
+    result('CMAB_s_ADD', CMAB_s_ADD, N, delta)
+    result('CMAB_s_MAX', CMAB_s_MAX, N, delta)
+    result('rdm_ADD', rdm_ADD, N, delta)
+    result('rdm_MAX', rdm_MAX, N, delta)
+    result('opt_ADD', opt_ADD, N, delta)
+    result('opt_MAX', opt_MAX, N, delta)
 
 
 # ### Run experiment with different delta
