@@ -169,8 +169,7 @@ def CMAB(p, m, L, sigma, Xn, gamma_func):
 
     # init mu and v, not sure
     mun_old = np.zeros((p, ))
-    vn_old = np.zeros((p, p))
-    np.fill_diagonal(vn_old, 1.0)
+    vn_old = np.eye(p)
 
     # observe all sensors for once
     for iter in range(0, math.ceil(p/m)):
@@ -272,8 +271,7 @@ def CMAB_s(p, m, L, sigma, Xn, gamma_func):
 
     # init mu and v, not sure
     mun_old = np.zeros((p, ))
-    vn_old = np.zeros((p, p))
-    np.fill_diagonal(vn_old, 1.0)
+    vn_old = np.eye(p)
 
     # observe all sensors for once
     for iter in range(0, math.ceil(p/m)):
@@ -354,8 +352,7 @@ def rdm(p, m, L, sigma, Xn):
 
     # init mu and v, not sure
     mun_old = np.zeros((p, ))
-    vn_old = np.zeros((p, p))
-    np.fill_diagonal(vn_old, 1.0)
+    vn_old = np.eye(p)
 
     # continue experiments and get ADD
     detect = L # init to the total # of observation
@@ -401,8 +398,7 @@ def opt(p, L, sigma, Xn):
 
     # init mu and v, not sure
     mun_old = np.zeros((p, ))
-    vn_old = np.zeros((p, p))
-    np.fill_diagonal(vn_old, 1.0)
+    vn_old = np.eye(p)
 
     # continue experiments and get ADD
     detect = L # init to the total # of observation

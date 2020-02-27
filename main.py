@@ -9,13 +9,13 @@ import numpy as np
 import cmab
 import env
 
-p = 10 # total # of sensors
-q = 4 # total # of misbehaved sensors
+p = 20 # total # of sensors
+q = 8 # total # of misbehaved sensors
 m = 5 # total # of observed sensors
 
 tau = 50 # error ocurrance time
 L = tau + 200 # length of one exp episode
-N = 200 # total experiment times
+N = 10 # total experiment times
 
 # generate sigma
 # some confusion on sigma[i,i]. set it to 1.0 here. not sure.
@@ -52,18 +52,18 @@ def run_exp(delta):
     for i in range(0, int(q / 2)): # first q elements to delta, error mean
         mu_c[i*2] = delta
         mu_c[i*2+1] = delta
-    # print(mu_c)
+    print(mu_c)
 
     CMAB_ADD, CMAB_s_ADD, rdm_ADD, opt_ADD = [], [], [], []
     CMAB_MAX, CMAB_s_MAX, rdm_MAX, opt_MAX = [], [], [], []
     for n in range(0, N):
         Xn = env.gen_input(mu, mu_c, sigma, tau, L)
         log(fname, 'mu_c {} iter {}'.format(mu_c, n))
-        # print('iter', n)
+        print('iter', n)
         # env.visualize(Xn)
 
         # CMAB
-        cmab.test.h = 6.0
+        cmab.test.h = 8.0
         detect = cmab.CMAB(p, m, L, sigma, Xn, cmab.gamma)
         ADD = detect - tau
         log(fname, 'cmab {} {} {}'.format(ADD, cmab.test.max, cmab.test.h))
@@ -72,7 +72,7 @@ def run_exp(delta):
         cmab.test.max = None
 
         # CMAB_s
-        cmab.CMAB_s.h = 1.5
+        cmab.CMAB_s.h = 100.0
         detect = cmab.CMAB_s(p, m, L, sigma, Xn, cmab.gamma)
         ADD = detect - tau
         log(fname, 'cmab_s {} {} {}'.format(ADD, cmab.CMAB_s.max, cmab.CMAB_s.h))
@@ -81,7 +81,7 @@ def run_exp(delta):
         cmab.CMAB_s.max = None
 
         # random
-        cmab.test.h = 6.0
+        cmab.test.h = 100.0
         detect = cmab.rdm(p, m, L, sigma, Xn)
         ADD = detect - tau
         log(fname, 'rdm {} {} {}'.format(ADD, cmab.test.max, cmab.test.h))
@@ -90,7 +90,7 @@ def run_exp(delta):
         cmab.test.max = None
 
         # optimal, m = p
-        cmab.test.h = 8.0
+        cmab.test.h = 100.0
         detect = cmab.opt(p, L, sigma, Xn)
         ADD = detect - tau
         log(fname, 'opt {} {} {}'.format(ADD, cmab.test.max, cmab.test.h))
@@ -129,19 +129,19 @@ run_exp(0.0)
 # In[22]:
 
 
-run_exp(0.5)
+#run_exp(0.5)
 
 
 # In[ ]:
 
 
-run_exp(1.0)
+#run_exp(1.0)
 
 
 # In[ ]:
 
 
-run_exp(1.5)
+#run_exp(1.5)
 
 
 # In[ ]:
